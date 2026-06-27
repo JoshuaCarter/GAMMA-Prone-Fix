@@ -4,7 +4,7 @@ Makes low-crouch ("prone") in **S.T.A.L.K.E.R. G.A.M.M.A.** actually useful — 
 
 ## Demo
 
-<video src="https://github.com/JoshuaCarter/GAMMA-Prone-Fix/raw/main/GAMMA%20Prone%20Fix.mp4" controls width="100%"></video>
+https://github.com/user-attachments/assets/d76e38ac-12f6-43be-a209-573fa6dc55bb
 
 ## The problem
 
