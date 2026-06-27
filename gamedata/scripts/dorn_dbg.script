@@ -1,0 +1,194 @@
+--[[
+	Dorn game log — fixed-slot on-screen debug readout.
+
+	Each entry is keyed by `order`: 0 = top-left, 1 = next line down, etc.
+	Writing the same order again replaces that slot instead of adding a line.
+
+	API:
+	  dorn_dbg.set_enabled(state)        -- caller feeds on/off (clears HUD when off)
+	  dorn_dbg.write(order, msg, color)  -- set/replace a slot
+	  dorn_dbg.clear()                   -- wipe all slots
+	  dorn_dbg.COLORS                    -- color markup table (use values directly)
+
+	`color` is optional — pass a value from dorn_dbg.COLORS (defaults to COLORS.white).
+	Logger does not read MCM; each caller must call set_enabled().
+
+	Example:
+	  dorn_dbg.set_enabled(true)
+	  dorn_dbg.write(0, "cam height: 1.20", dorn_dbg.COLORS)
+]]
+
+dorn_dbg = dorn_dbg or {}
+
+local HUD_STATIC = "debug_info"
+local ORIGIN_X = 10
+local ORIGIN_Y = 10
+
+-- known color names -> a,r,g,b markup for complex_mode statics
+dorn_dbg.COLORS = {
+	-- neutrals
+	white       = "%c[255,255,255,255]",
+	light_gray  = "%c[255,210,210,210]",
+	gray        = "%c[255,160,160,160]",
+	dark_gray   = "%c[255,96,96,96]",
+	black       = "%c[255,16,16,16]",
+
+	-- red
+	light_red   = "%c[255,255,140,140]",
+	red         = "%c[255,255,64,64]",
+	dark_red    = "%c[255,170,32,32]",
+
+	-- green
+	light_green = "%c[255,150,255,150]",
+	green       = "%c[255,96,224,96]",
+	dark_green  = "%c[255,40,150,40]",
+
+	-- blue
+	light_blue  = "%c[255,150,190,255]",
+	blue        = "%c[255,96,160,255]",
+	dark_blue   = "%c[255,48,90,200]",
+
+	-- yellow
+	light_yellow= "%c[255,255,240,150]",
+	yellow      = "%c[255,255,224,64]",
+	dark_yellow = "%c[255,200,170,32]",
+
+	-- cyan
+	light_cyan  = "%c[255,170,240,255]",
+	cyan        = "%c[255,96,224,255]",
+	dark_cyan   = "%c[255,40,160,180]",
+
+	-- orange
+	light_orange= "%c[255,255,200,130]",
+	orange      = "%c[255,255,160,48]",
+	dark_orange = "%c[255,200,110,24]",
+
+	-- purple
+	light_purple= "%c[255,210,170,255]",
+	purple      = "%c[255,170,96,255]",
+	dark_purple = "%c[255,110,48,170]",
+
+	-- pink
+	light_pink  = "%c[255,255,190,225]",
+	pink        = "%c[255,255,128,200]",
+	dark_pink   = "%c[255,200,72,140]",
+
+	-- extra hues
+	magenta     = "%c[255,255,64,255]",
+	teal        = "%c[255,32,170,160]",
+	lime        = "%c[255,170,255,64]",
+	brown       = "%c[255,150,100,60]",
+}
+
+local function resolve_color(color)
+	if color == nil then
+		return dorn_dbg.COLORS.white
+	end
+	if type(color) == "string" and color:sub(1, 3) == "%c[" then
+		return color
+	end
+	return dorn_dbg.COLORS[color] or dorn_dbg.COLORS.white
+end
+
+-- slots[order] = { msg = string, color = string }
+local slots = {}
+local enabled = false
+
+-- Re-fetch (and re-add) the static every call; do not cache.
+local function get_static()
+	local hud = get_hud()
+	if not hud then
+		return nil
+	end
+	local cs = hud:GetCustomStatic(HUD_STATIC)
+	if not cs then
+		hud:AddCustomStatic(HUD_STATIC, true)
+		cs = hud:GetCustomStatic(HUD_STATIC)
+	end
+	return cs
+end
+
+local function render()
+	local cs = get_static()
+	if not cs then
+		return
+	end
+	local wnd = cs:wnd()
+	if not wnd then
+		return
+	end
+	wnd:SetWndPos(vector2():set(ORIGIN_X, ORIGIN_Y))
+
+	local max_order = -1
+	for order in pairs(slots) do
+		if order > max_order then
+			max_order = order
+		end
+	end
+	if max_order < 0 then
+		wnd:TextControl():SetTextST("")
+		return
+	end
+
+	local lines = {}
+	for order = 0, max_order do
+		local slot = slots[order]
+		if slot then
+			lines[#lines + 1] = resolve_color(slot.color) .. slot.msg
+		else
+			lines[#lines + 1] = ""
+		end
+	end
+
+	wnd:TextControl():SetTextST(table.concat(lines, "\\n"))
+end
+
+local function clear_screen()
+	local hud = get_hud()
+	if not hud then
+		return
+	end
+	if hud:GetCustomStatic(HUD_STATIC) then
+		hud:RemoveCustomStatic(HUD_STATIC)
+	end
+end
+
+function dorn_dbg.set_enabled(state)
+	local on = state == true
+	if enabled == on then
+		return
+	end
+	enabled = on
+
+	if enabled then
+		printf("[DBG] enabled")
+	else
+		printf("[DBG] disabled")
+		dorn_dbg.clear()
+	end
+end
+
+function dorn_dbg.write(order, msg, color)
+	if not enabled then
+		return
+	end
+	if order == nil then
+		order = 0
+	end
+	slots[order] = { msg = tostring(msg), color = color }
+	render()
+end
+
+function dorn_dbg.clear()
+	slots = {}
+	clear_screen()
+end
+
+function on_game_start()
+	slots = {}
+	enabled = false
+end
+
+function on_game_end()
+	dorn_dbg.clear()
+end

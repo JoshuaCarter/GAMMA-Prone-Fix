@@ -1,0 +1,50 @@
+function on_mcm_load()
+	return {
+		id = "dorn_prone_fix",
+		text = "Dorn's Prone Fix",
+		sh = true,
+		gr = {
+			{ id = "title", type = "title", text = "Dorn's Prone Fix" },
+			{ id = "line_heights", type = "line" },
+			{ id = "heights_title", type = "title", text = "Camera heights (metres above feet)" },
+			{
+				id = "cam_height_stand",
+				type = "track",
+				val = 2,
+				min = 0,
+				max = 2,
+				step = 0.01,
+				def = 1.80,
+				text = "Standing",
+			},
+			{
+				id = "cam_height_crouch",
+				type = "track",
+				val = 2,
+				min = 0,
+				max = 2,
+				step = 0.01,
+				def = 1.34,
+				text = "Crouch",
+			},
+			{
+				id = "cam_height_prone",
+				type = "track",
+				val = 2,
+				min = 0,
+				max = 2,
+				step = 0.01,
+				def = 0.44,
+				text = "Prone",
+			},
+			{ id = "line_debug", type = "line" },
+			{
+				id = "debug_log",
+				type = "check",
+				val = 1,
+				def = false,
+				text = "Debug logging (on-screen scroll)",
+			},
+		},
+	}
+end
