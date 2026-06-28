@@ -25,10 +25,12 @@ Vanilla prone is fake. It's really just a low crouch: your view drops, but your 
 - **Third person** — looks ridiculous
 - Getting in and out of prone is janky but this only affects shadows (and it's less janky than current shadows anyway)
 - Best effort given modding constraints — also my first mod - don't expect too much
+- You take 20% more damage by default when prone, but you can adjust that (100% - 200%) in an effort to compensate for the missing limbs...
 
 ## Installation
 
-1. Install via MCM like normal
+1. Download the latest release from here: https://github.com/JoshuaCarter/GAMMA-Prone-Fix/releases <img width="695" height="275" alt="Screenshot 2026-06-27 232624" src="https://github.com/user-attachments/assets/e91f0db7-fcc0-4195-a7f4-de0e3ee6b419" />
+2. Install via MCM like normal
 
 ## Warnings!
 
