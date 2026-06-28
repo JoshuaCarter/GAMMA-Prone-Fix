@@ -39,7 +39,7 @@ local is_prone = nil
 
 local function log(log_type, msg)
 	if dorn_dbg then
-		dorn_dbg.write(log_type.order, "[ProneFix] " .. tostring(msg), log_type.color)
+		dorn_dbg.write(MOD_ID, log_type.order, "[ProneFix] " .. tostring(msg), log_type.color)
 	end
 end
 
@@ -187,7 +187,7 @@ end
 local function cb_sync_config()
 	if dorn_mcm then
 		if dorn_dbg then
-			dorn_dbg.set_enabled(dorn_mcm.bool(MOD_ID, "development/debug_log", false))
+			dorn_dbg.set_enabled(MOD_ID, dorn_mcm.bool(MOD_ID, "development/debug_log", false))
 		end
 
 		CAMERA_HEIGHTS = {
