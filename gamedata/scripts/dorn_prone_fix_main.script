@@ -27,13 +27,13 @@ local LOG_TYPE = {
 	DAMAGE 			= {order = 10, color = _G.dorn_dbg.COLORS.orange},
 }
 
-local CAMERA_HEIGHTS = {
-	STAND = 1.65,
-	CROUCH = 1.2,
-	PRONE = 0.45,
+local CONFIG = {
+	debug_log = false,
+	cam_height_stand = 1.65,
+	cam_height_crouch = 1.2,
+	cam_height_prone = 0.45,
+	prone_damage_mult = 1.2,
 }
-
-local PRONE_DAMAGE_MULT = 1
 
 local is_prone = nil
 
@@ -50,15 +50,15 @@ local function get_nearest_posture_from_camera_height(actor)
 		return device().cam_pos.y - actor:position().y
 	end)
 	if not ok or not height then
-		height = CAMERA_HEIGHTS.STAND
+		height = CONFIG.cam_height_stand
 	end
 
 	log(LOG_TYPE.HEIGHT, string.format("cam height: %.2f", height))
 
 	-- get dist from cam to known posture heights
-	local stand_dist = math.abs(CAMERA_HEIGHTS.STAND - height)
-	local crouch_dist = math.abs(CAMERA_HEIGHTS.CROUCH - height)
-	local prone_dist = math.abs(CAMERA_HEIGHTS.PRONE - height)
+	local stand_dist = math.abs(CONFIG.cam_height_stand - height)
+	local crouch_dist = math.abs(CONFIG.cam_height_crouch - height)
+	local prone_dist = math.abs(CONFIG.cam_height_prone - height)
 
 	-- return posture with shortest distance
 	if stand_dist < crouch_dist and stand_dist < prone_dist then
@@ -125,7 +125,7 @@ local function play_motion(actor, motion, mix_in)
 	return ok
 end
 
-local function cb_actor_on_update()
+local function on_actor_on_update()
 	local actor = db.actor
 	if not actor then
 		return
@@ -172,41 +172,38 @@ local function cb_actor_on_update()
 	end
 end
 
-local function cb_actor_on_before_hit(shit, bone_id, flags)
+local function on_actor_on_before_hit(shit, bone_id, flags)
 	if not is_prone or not shit or not shit.power or shit.power <= 0 then
 		return
 	end
-	if PRONE_DAMAGE_MULT <= 1 then
+	if CONFIG.prone_damage_mult <= 1 then
 		return
 	end
 
 	local before = shit.power
-	shit.power = before * PRONE_DAMAGE_MULT
-	log(LOG_TYPE.DAMAGE, string.format("damage: x%.2f: %.2f -> %.2f", PRONE_DAMAGE_MULT, before, shit.power))
+	shit.power = before * CONFIG.prone_damage_mult
+	log(LOG_TYPE.DAMAGE, string.format("damage: x%.2f: %.2f -> %.2f", CONFIG.prone_damage_mult, before, shit.power))
 end
 
-local function cb_sync_config()
+local function on_option_change()
 	if _G.dorn_mcm then
-		if _G.dorn_dbg then
-			_G.dorn_dbg.set_enabled(MOD_ID, _G.dorn_mcm.bool(MOD_ID, "development/debug_log", false))
-		end
-
-		CAMERA_HEIGHTS = {
-			STAND = _G.dorn_mcm.number(MOD_ID, "development/cam_height_stand", 1.80),
-			CROUCH = _G.dorn_mcm.number(MOD_ID, "development/cam_height_crouch", 1.34),
-			PRONE = _G.dorn_mcm.number(MOD_ID, "development/cam_height_prone", 0.44),
-		}
-
-		PRONE_DAMAGE_MULT = _G.dorn_mcm.number(MOD_ID, "main/prone_damage_mult", 1.2)
+		CONFIG.debug_log = _G.dorn_mcm.bool(MOD_ID, "development/debug_log", false)
+		CONFIG.cam_height_stand = _G.dorn_mcm.number(MOD_ID, "development/cam_height_stand", 1.65)
+		CONFIG.cam_height_crouch = _G.dorn_mcm.number(MOD_ID, "development/cam_height_crouch", 1.2)
+		CONFIG.cam_height_prone = _G.dorn_mcm.number(MOD_ID, "development/cam_height_prone", 0.45)
+		CONFIG.prone_damage_mult = _G.dorn_mcm.number(MOD_ID, "main/prone_damage_mult", 1.2)
+	end
+	if _G.dorn_dbg then
+		_G.dorn_dbg.set_enabled(MOD_ID, CONFIG.debug_log)
 	end
 end
 
 function on_game_start()
 	is_prone = nil
-	cb_sync_config()
-	RegisterScriptCallback("actor_on_update", cb_actor_on_update)
-	RegisterScriptCallback("actor_on_before_hit", cb_actor_on_before_hit)
-	RegisterScriptCallback("on_option_change", cb_sync_config)
+	on_option_change()
+	RegisterScriptCallback("actor_on_update", on_actor_on_update)
+	RegisterScriptCallback("actor_on_before_hit", on_actor_on_before_hit)
+	RegisterScriptCallback("on_option_change", on_option_change)
 
 	log(LOG_TYPE.LIFECYCLE, "loaded")
 end
@@ -215,9 +212,9 @@ function on_game_end()
 	if db.actor then
 		set_prone_bones_visible(db.actor, true)
 	end
-	UnregisterScriptCallback("actor_on_update", cb_actor_on_update)
-	UnregisterScriptCallback("actor_on_before_hit", cb_actor_on_before_hit)
-	UnregisterScriptCallback("on_option_change", cb_sync_config)
+	UnregisterScriptCallback("actor_on_update", on_actor_on_update)
+	UnregisterScriptCallback("actor_on_before_hit", on_actor_on_before_hit)
+	UnregisterScriptCallback("on_option_change", on_option_change)
 
 	log(LOG_TYPE.LIFECYCLE, "unloaded")
 end
