@@ -1,0 +1,35 @@
+-- dorn-common-version: 0.1.8
+--[[ AUTO-GENERATED — synced from GAMMA-Common (common_0_1_8) ]]
+
+local COMMON = "common_0_1_8"
+
+process_file(COMMON .. "/dorn_mcm")
+process_file(COMMON .. "/dorn_dbg")
+process_file(COMMON .. "/dorn_sys")
+
+local mcm = _G[COMMON .. "/dorn_mcm"]
+local dbg = _G[COMMON .. "/dorn_dbg"]
+local sys = _G[COMMON .. "/dorn_sys"]
+
+sys.set_deps(mcm, dbg)
+
+function path()
+	return COMMON
+end
+
+function get()
+	return {
+		VERSION = "0.1.8",
+		COMMON = COMMON,
+		mcm = mcm,
+		dbg = dbg,
+		sys = sys,
+	}
+end
+
+function init(mod_id)
+	if mod_id then
+		sys.reset_mod(mod_id)
+		dbg.clear_source(mod_id)
+	end
+end

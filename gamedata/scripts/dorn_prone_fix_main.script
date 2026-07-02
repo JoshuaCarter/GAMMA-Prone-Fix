@@ -7,6 +7,9 @@
 
 local MOD_ID = "dorn_prone_fix"
 
+process_file("dorn_prone_fix_common")
+local DORN = dorn_prone_fix_common.get()
+
 local POSTURES = {
 	STAND 	= "stand",
 	CROUCH 	= "crouch",
@@ -39,20 +42,19 @@ local is_prone = nil
 local blend_move_anims = get_console():get_bool("blend_move_anims") or false
 
 local function log(log_type, msg)
-	if _G.dorn_dbg then
+	if DORN.dbg then
 		local slot = log_type or LOG_TYPE.LIFECYCLE
-		local colors = _G.dorn_dbg.COLORS
-		_G.dorn_dbg.write(MOD_ID, slot.order, "[ProneFix] " .. tostring(msg), colors and colors[slot.color])
+		DORN.dbg.write(MOD_ID, slot.order, "[ProneFix] " .. tostring(msg), slot.color)
 	end
 end
 
 local function on_option_change()
-	CONFIG.debug_log = _G.dorn_mcm.bool(MOD_ID, "development/debug_log", false)
-	CONFIG.cam_height_stand = _G.dorn_mcm.number(MOD_ID, "development/cam_height_stand", 1.65)
-	CONFIG.cam_height_crouch = _G.dorn_mcm.number(MOD_ID, "development/cam_height_crouch", 1.2)
-	CONFIG.cam_height_prone = _G.dorn_mcm.number(MOD_ID, "development/cam_height_prone", 0.45)
-	CONFIG.prone_damage_mult = _G.dorn_mcm.number(MOD_ID, "main/prone_damage_mult", 1.2)
-	_G.dorn_dbg.set_enabled(MOD_ID, CONFIG.debug_log)
+	CONFIG.debug_log = DORN.mcm.bool(MOD_ID, "development/debug_log", false)
+	CONFIG.cam_height_stand = DORN.mcm.number(MOD_ID, "development/cam_height_stand", 1.65)
+	CONFIG.cam_height_crouch = DORN.mcm.number(MOD_ID, "development/cam_height_crouch", 1.2)
+	CONFIG.cam_height_prone = DORN.mcm.number(MOD_ID, "development/cam_height_prone", 0.45)
+	CONFIG.prone_damage_mult = DORN.mcm.number(MOD_ID, "main/prone_damage_mult", 1.2)
+	DORN.dbg.set_enabled(MOD_ID, CONFIG.debug_log)
 end
 
 local function get_nearest_posture_from_camera_height(actor)
@@ -137,7 +139,7 @@ local function play_motion(actor, motion, mix_in)
 end
 
 local function on_actor_on_update()
-	local _, actor = _G.dorn_sys.ready(MOD_ID, db, on_option_change)
+	local _, actor = DORN.sys.ready(MOD_ID, db, on_option_change)
 	if not actor then
 		return
 	end
@@ -205,7 +207,7 @@ local function on_actor_on_update()
 end
 
 local function on_actor_on_before_hit(shit, bone_id, flags)
-	if not _G.dorn_sys.ready(MOD_ID, db) then
+	if not DORN.sys.ready(MOD_ID, db) then
 		return
 	end
 	if not is_prone or not shit or not shit.power or shit.power <= 0 then
@@ -221,6 +223,8 @@ local function on_actor_on_before_hit(shit, bone_id, flags)
 end
 
 function on_game_start()
+	dorn_prone_fix_common.init(MOD_ID)
+
 	is_prone = nil
 	RegisterScriptCallback("actor_on_update", on_actor_on_update)
 	RegisterScriptCallback("actor_on_before_hit", on_actor_on_before_hit)
