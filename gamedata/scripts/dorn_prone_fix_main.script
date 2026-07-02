@@ -6,9 +6,9 @@
 ]]
 
 local MOD_ID = "dorn_prone_fix"
+local COMMON = "dorn_common_e96dd465" -- bump via sync-dorn-common.sh
 
-process_file("dorn_prone_fix_common")
-local DORN = dorn_prone_fix_common.get()
+local DORN
 
 local POSTURES = {
 	STAND 	= "stand",
@@ -223,7 +223,7 @@ local function on_actor_on_before_hit(shit, bone_id, flags)
 end
 
 function on_game_start()
-	dorn_prone_fix_common.init(MOD_ID)
+	DORN = _G[COMMON].load(MOD_ID)
 
 	is_prone = nil
 	RegisterScriptCallback("actor_on_update", on_actor_on_update)
