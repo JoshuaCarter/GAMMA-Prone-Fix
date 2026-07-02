@@ -6,7 +6,7 @@
 ]]
 
 local MOD_ID = "dorn_prone_fix"
-local COMMON = "dorn_common_0122c2dd" -- bump via sync-dorn-common.sh
+local DORN_COMMON_VERSION = "dorn_common_7367f5e7" -- managed by sync-dorn-common.sh, do not hand-edit
 
 local DORN
 
@@ -223,7 +223,7 @@ local function on_actor_on_before_hit(shit, bone_id, flags)
 end
 
 function on_game_start()
-	DORN = _G[COMMON].load(MOD_ID)
+	DORN = _G[DORN_COMMON_VERSION].load(MOD_ID)
 
 	is_prone = nil
 	RegisterScriptCallback("actor_on_update", on_actor_on_update)
