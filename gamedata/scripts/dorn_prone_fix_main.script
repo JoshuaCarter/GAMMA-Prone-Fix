@@ -144,6 +144,18 @@ local function on_actor_on_update()
 		return
 	end
 
+	if not actor:alive() then
+		set_prone_bones_visible(actor, true)
+		if is_prone then
+			log(LOG_TYPE.STATE, "state: died, restore bones")
+			is_prone = false
+			if blend_move_anims then
+				get_console():execute("blend_move_anims on")
+			end
+		end
+		return
+	end
+
 	local camera_posture = get_nearest_posture_from_camera_height(actor)
 	local input_posture = get_posture_from_player_input()
 
