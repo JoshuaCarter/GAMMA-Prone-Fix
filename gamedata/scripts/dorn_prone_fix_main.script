@@ -32,6 +32,7 @@ local LOG_TYPE = {
 
 local CONFIG = {
 	debug_log = false,
+	hide_prone_bones = true,
 	cam_height_stand = 1.65,
 	cam_height_crouch = 1.2,
 	cam_height_prone = 0.45,
@@ -39,6 +40,7 @@ local CONFIG = {
 }
 
 local is_prone = nil
+local set_prone_bones_visible
 local blend_move_anims = get_console():get_bool("blend_move_anims") or false
 
 local function log(log_type, msg)
@@ -50,11 +52,21 @@ end
 
 local function on_option_change()
 	CONFIG.debug_log = DORN.mcm.bool(MOD_ID, "development/debug_log", false)
+	CONFIG.hide_prone_bones = DORN.mcm.bool(MOD_ID, "main/hide_prone_bones", true)
 	CONFIG.cam_height_stand = DORN.mcm.number(MOD_ID, "development/cam_height_stand", 1.65)
 	CONFIG.cam_height_crouch = DORN.mcm.number(MOD_ID, "development/cam_height_crouch", 1.2)
 	CONFIG.cam_height_prone = DORN.mcm.number(MOD_ID, "development/cam_height_prone", 0.45)
 	CONFIG.prone_damage_mult = DORN.mcm.number(MOD_ID, "main/prone_damage_mult", 1.2)
 	DORN.dbg.set_enabled(MOD_ID, CONFIG.debug_log)
+
+	local _, actor = DORN.sys.ready(MOD_ID, db)
+	if actor and actor:alive() then
+		if CONFIG.hide_prone_bones then
+			set_prone_bones_visible(actor, not is_prone)
+		else
+			set_prone_bones_visible(actor, true)
+		end
+	end
 end
 
 local function get_nearest_posture_from_camera_height(actor)
@@ -106,7 +118,7 @@ local function get_posture_from_player_input()
 	end
 end
 
-local function set_prone_bones_visible(actor, visible)
+set_prone_bones_visible = function(actor, visible)
 	if visible then
 		log(LOG_TYPE.BONES, "bones: shown")
 	else
@@ -145,7 +157,9 @@ local function on_actor_on_update()
 	end
 
 	if not actor:alive() then
-		set_prone_bones_visible(actor, true)
+		if CONFIG.hide_prone_bones then
+			set_prone_bones_visible(actor, true)
+		end
 		if is_prone then
 			log(LOG_TYPE.STATE, "state: died, restore bones")
 			is_prone = false
@@ -185,7 +199,9 @@ local function on_actor_on_update()
 			is_prone = true
 
 			-- hide bones when camera is nearest the prone posture
-			set_prone_bones_visible(actor, false)
+			if CONFIG.hide_prone_bones then
+				set_prone_bones_visible(actor, false)
+			end
 
 			-- disable 1st person player blend_move_anims
 			if blend_move_anims then
@@ -197,7 +213,9 @@ local function on_actor_on_update()
 		is_prone = false
 
 		-- show bones and trigger new idle motion on leaving prone
-		set_prone_bones_visible(actor, true)
+		if CONFIG.hide_prone_bones then
+			set_prone_bones_visible(actor, true)
+		end
 		if input_posture == POSTURES.STAND then
 			log(LOG_TYPE.STATE, "state: standing")
 			play_motion(actor, "norm_idle_0", true)

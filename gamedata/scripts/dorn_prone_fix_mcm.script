@@ -9,6 +9,13 @@ function on_mcm_load()
 				text = "Main",
 				gr = {
 					{
+						id = "hide_prone_bones",
+						type = "check",
+						val = 1,
+						def = true,
+						hint = "dorn_prone_fix_hide_prone_bones",
+					},
+					{
 						id = "prone_damage_mult",
 						type = "track",
 						val = 2,
