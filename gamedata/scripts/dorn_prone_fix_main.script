@@ -6,7 +6,7 @@
 ]]
 
 local MOD_ID = "dorn_prone_fix"
-local DORN_COMMON_VERSION = "dorn_common_7367f5e7" -- managed by sync-dorn-common.sh, do not hand-edit
+local DORN_COMMON_VERSION = "dorn_common_3ea88f51" -- managed by sync-dorn-common.sh, do not hand-edit
 
 local DORN
 
@@ -32,6 +32,7 @@ local LOG_TYPE = {
 
 local CONFIG = {
 	debug_log = false,
+	debug_overlay = false,
 	hide_prone_bones = true,
 	cam_height_stand = 1.65,
 	cam_height_crouch = 1.2,
@@ -44,20 +45,27 @@ local set_prone_bones_visible
 local blend_move_anims = get_console():get_bool("blend_move_anims") or false
 
 local function log(log_type, msg)
-	if DORN.dbg then
-		local slot = log_type or LOG_TYPE.LIFECYCLE
-		DORN.dbg.write(MOD_ID, slot.order, "[ProneFix] " .. tostring(msg), slot.color)
+	if not DORN.dbg then
+		return
+	end
+	local slot = log_type or LOG_TYPE.LIFECYCLE
+	if CONFIG.debug_overlay then
+		DORN.dbg.overlay(MOD_ID, slot.order, "[ProneFix] " .. tostring(msg), slot.color)
+	end
+	if CONFIG.debug_log then
+		DORN.dbg.log(MOD_ID, tostring(msg))
 	end
 end
 
 local function on_option_change()
 	CONFIG.debug_log = DORN.mcm.bool(MOD_ID, "development/debug_log", false)
+	CONFIG.debug_overlay = DORN.mcm.bool(MOD_ID, "development/debug_overlay", false)
 	CONFIG.hide_prone_bones = DORN.mcm.bool(MOD_ID, "main/hide_prone_bones", true)
 	CONFIG.cam_height_stand = DORN.mcm.number(MOD_ID, "development/cam_height_stand", 1.65)
 	CONFIG.cam_height_crouch = DORN.mcm.number(MOD_ID, "development/cam_height_crouch", 1.2)
 	CONFIG.cam_height_prone = DORN.mcm.number(MOD_ID, "development/cam_height_prone", 0.45)
 	CONFIG.prone_damage_mult = DORN.mcm.number(MOD_ID, "main/prone_damage_mult", 1.2)
-	DORN.dbg.set_enabled(MOD_ID, CONFIG.debug_log)
+	DORN.dbg.set_enabled(MOD_ID, CONFIG.debug_overlay)
 
 	local _, actor = DORN.sys.ready(MOD_ID, db)
 	if actor and actor:alive() then

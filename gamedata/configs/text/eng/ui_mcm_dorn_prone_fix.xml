@@ -18,7 +18,10 @@
 	<string id="ui_mcm_dorn_prone_fix_cam_height_prone">
 		<text>Prone</text>
 	</string>
+	<string id="ui_mcm_dorn_prone_fix_debug_overlay">
+		<text>Enable debug overlay</text>
+	</string>
 	<string id="ui_mcm_dorn_prone_fix_debug_log">
-		<text>Debug logging (on-screen)</text>
+		<text>Enable debug logging</text>
 	</string>
 </string_table>

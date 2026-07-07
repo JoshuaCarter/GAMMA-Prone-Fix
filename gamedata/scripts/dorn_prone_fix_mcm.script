@@ -69,6 +69,13 @@ function on_mcm_load()
 					},
 					{ id = "line_debug", type = "line" },
 					{
+						id = "debug_overlay",
+						type = "check",
+						val = 1,
+						def = false,
+						hint = "dorn_prone_fix_debug_overlay",
+					},
+					{
 						id = "debug_log",
 						type = "check",
 						val = 1,
