@@ -1,4 +1,4 @@
-# GAMMA Prone Fix
+# GAMMA Prone Fix v0.1.17
 
 ## Just watch the video :)
 
@@ -31,10 +31,21 @@ Vanilla prone is fake. It's really just a low crouch: your view drops, but your 
 
 ## Installation
 
-1. Download the latest release from here: https://github.com/JoshuaCarter/GAMMA-Prone-Fix/releases <img width="695" height="275" alt="Screenshot 2026-06-27 232624" src="https://github.com/user-attachments/assets/e91f0db7-fcc0-4195-a7f4-de0e3ee6b419" />
+1. Download the latest release from https://github.com/JoshuaCarter/GAMMA-Prone-Fix/releases
 2. Install via MO2 like normal
 
 ## Warnings!
 
 - This mod overrides the `stalker_smart_cover_animation.omf` animations file so it wont play nice with other mods that do the same (If you know a better way, im listening)
 - This mod relies on calculations that use camera height, so your pose/posture will be broken in 3rd person etc.
+
+## Other mods
+
+- https://github.com/JoshuaCarter/GAMMA-Dont-ReEquip-PDA
+- https://github.com/JoshuaCarter/GAMMA-Faster-Skinning
+- https://github.com/JoshuaCarter/GAMMA-Field-Strip-All-Keybind
+- https://github.com/JoshuaCarter/GAMMA-FPS-Counter
+- https://github.com/JoshuaCarter/GAMMA-Giant-Jump
+- https://github.com/JoshuaCarter/GAMMA-Optimal-Tool-Use
+- https://github.com/JoshuaCarter/GAMMA-Radiation-Grain-Fix
+- https://github.com/JoshuaCarter/GAMMA-Tooltip-Weapon-Damage

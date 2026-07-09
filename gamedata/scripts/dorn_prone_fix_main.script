@@ -21,7 +21,6 @@ local LOG_TYPE = {
 	HEIGHT 			= {order = 1, color = "cyan"},
 	HEIGHT_POSTURE 	= {order = 2, color = "blue"},
 	INPUT_POSTURE 	= {order = 3, color = "yellow"},
-	BONES 			= {order = 4, color = "light_green"},
 	CROUCH 			= {order = 7, color = "dark_orange"},
 	ACCEL 			= {order = 8, color = "dark_orange"},
 	ANIM 			= {order = 9, color = "light_pink"},
