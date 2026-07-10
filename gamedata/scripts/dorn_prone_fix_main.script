@@ -16,7 +16,7 @@ local POSTURES = {
 	PRONE 	= "prone",
 }
 
-local LOG_TYPE = {
+local LOG = {
 	LIFECYCLE 		= {order = 0, color = "gray"},
 	HEIGHT 			= {order = 1, color = "cyan"},
 	HEIGHT_POSTURE 	= {order = 2, color = "blue"},
@@ -24,7 +24,6 @@ local LOG_TYPE = {
 	CROUCH 			= {order = 7, color = "dark_orange"},
 	ACCEL 			= {order = 8, color = "dark_orange"},
 	ANIM 			= {order = 9, color = "light_pink"},
-	DAMAGE 			= {order = 10, color = "orange"},
 }
 
 local CONFIG = {
@@ -47,7 +46,7 @@ local function overlay(log_type, msg)
 		return
 	end
 	if CONFIG.debug_overlay then
-		local slot = log_type or LOG_TYPE.LIFECYCLE
+		local slot = log_type or LOG.LIFECYCLE
 		DORN.dbg.overlay(MOD_ID, slot.order, tostring(msg), slot.color)
 	end
 end
@@ -82,55 +81,6 @@ local function on_option_change()
 	end
 end
 
-local function get_nearest_posture_from_camera_height(actor)
-	-- get cam height from actor origin (feet)
-	local ok, height = pcall(function()
-		return device().cam_pos.y - actor:position().y
-	end)
-	if not ok or not height then
-		height = CONFIG.cam_height_stand
-	end
-
-	overlay(LOG_TYPE.HEIGHT, string.format("cam height: %.2f", height))
-
-	-- get dist from cam to known posture heights
-	local stand_dist = math.abs(CONFIG.cam_height_stand - height)
-	local crouch_dist = math.abs(CONFIG.cam_height_crouch - height)
-	local prone_dist = math.abs(CONFIG.cam_height_prone - height)
-
-	-- return posture with shortest distance
-	if stand_dist < crouch_dist and stand_dist < prone_dist then
-		overlay(LOG_TYPE.HEIGHT_POSTURE, "height posture: " .. tostring(POSTURES.STAND))
-		return POSTURES.STAND
-	elseif crouch_dist < stand_dist and crouch_dist < prone_dist then
-		overlay(LOG_TYPE.HEIGHT_POSTURE, "height posture: " .. tostring(POSTURES.CROUCH))
-		return POSTURES.CROUCH
-	else
-		overlay(LOG_TYPE.HEIGHT_POSTURE, "height posture: " .. tostring(POSTURES.PRONE))
-		return POSTURES.PRONE
-	end
-end
-
-local function get_posture_from_player_input()
-	-- get input posture from move states
-	local isSlow = IsMoveState("mcAccel")
-	local isCrouching = IsMoveState("mcCrouch")
-
-	overlay(LOG_TYPE.CROUCH, "Crouch: " .. tostring(isCrouching))
-	overlay(LOG_TYPE.ACCEL, "Slow: " .. tostring(isSlow))
-
-	if not isCrouching then
-		overlay(LOG_TYPE.INPUT_POSTURE, "input posture: " .. tostring(POSTURES.STAND))
-		return POSTURES.STAND
-	elseif not isSlow then
-		overlay(LOG_TYPE.INPUT_POSTURE, "input posture: " .. tostring(POSTURES.CROUCH))
-		return POSTURES.CROUCH
-	else
-		overlay(LOG_TYPE.INPUT_POSTURE, "input posture: " .. tostring(POSTURES.PRONE))
-		return POSTURES.PRONE
-	end
-end
-
 set_prone_bones_visible = function(actor, visible)
 	if visible then
 		log("bones: shown")
@@ -153,7 +103,7 @@ set_prone_bones_visible = function(actor, visible)
 end
 
 local function play_motion(actor, motion, mix_in)
-	overlay(LOG_TYPE.ANIM, "Motion: " .. tostring(motion))
+	overlay(LOG.ANIM, "Motion: " .. tostring(motion))
 	local ok = pcall(function()
 		actor:play_cycle(motion, mix_in)
 	end)
@@ -183,8 +133,48 @@ local function on_actor_on_update()
 		return
 	end
 
-	local camera_posture = get_nearest_posture_from_camera_height(actor)
-	local input_posture = get_posture_from_player_input()
+	-- nearest posture from camera height (feet to cam)
+	local ok, height = pcall(function()
+		return device().cam_pos.y - actor:position().y
+	end)
+	if not ok or not height then
+		height = CONFIG.cam_height_stand
+	end
+	overlay(LOG.HEIGHT, string.format("cam height: %.2f", height))
+
+	local stand_dist = math.abs(CONFIG.cam_height_stand - height)
+	local crouch_dist = math.abs(CONFIG.cam_height_crouch - height)
+	local prone_dist = math.abs(CONFIG.cam_height_prone - height)
+
+	local camera_posture
+	if stand_dist < crouch_dist and stand_dist < prone_dist then
+		overlay(LOG.HEIGHT_POSTURE, "height posture: " .. tostring(POSTURES.STAND))
+		camera_posture = POSTURES.STAND
+	elseif crouch_dist < stand_dist and crouch_dist < prone_dist then
+		overlay(LOG.HEIGHT_POSTURE, "height posture: " .. tostring(POSTURES.CROUCH))
+		camera_posture = POSTURES.CROUCH
+	else
+		overlay(LOG.HEIGHT_POSTURE, "height posture: " .. tostring(POSTURES.PRONE))
+		camera_posture = POSTURES.PRONE
+	end
+
+	-- input posture from move states
+	local is_slow = IsMoveState("mcAccel")
+	local is_crouching = IsMoveState("mcCrouch")
+	overlay(LOG.CROUCH, "Crouch: " .. tostring(is_crouching))
+	overlay(LOG.ACCEL, "Slow: " .. tostring(is_slow))
+
+	local input_posture
+	if not is_crouching then
+		overlay(LOG.INPUT_POSTURE, "input posture: " .. tostring(POSTURES.STAND))
+		input_posture = POSTURES.STAND
+	elseif not is_slow then
+		overlay(LOG.INPUT_POSTURE, "input posture: " .. tostring(POSTURES.CROUCH))
+		input_posture = POSTURES.CROUCH
+	else
+		overlay(LOG.INPUT_POSTURE, "input posture: " .. tostring(POSTURES.PRONE))
+		input_posture = POSTURES.PRONE
+	end
 
 	-- first update
 	if is_prone == nil then
