@@ -34,4 +34,5 @@ Vanilla prone is fake: low crouch with a dropped view but high body. You think y
 - Pose uses camera height — broken in 3rd person
 
 ## See my other mods here:
+
 https://github.com/JoshuaCarter/GAMMA-Mods
