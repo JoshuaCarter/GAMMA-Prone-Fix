@@ -2,7 +2,6 @@
 	Dorn's Prone Fix
 
 	Prone (mcCrouch + mcAccel): play_cycle on a shared OMF motion.
-	Torch: camera-locked via mod_system_dorn_prone_fix.ltx (torch_inertion = false).
 ]]
 
 local MOD_ID = "dorn_prone_fix"

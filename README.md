@@ -1,4 +1,4 @@
-# Dorn's Prone Fix v0.1.17
+# Dorn's Prone Fix v0.1.18
 
 Makes low-crouch ("prone") in **S.T.A.L.K.E.R. G.A.M.M.A.** useful within modding limits — hacky workaround, not real prone. Watch the demo.
 
@@ -13,7 +13,6 @@ Vanilla prone is fake: low crouch with a dropped view but high body. You think y
 ## What this mod does
 
 - Lowers posture closer to real prone
-- Fixes headlamp to follow your view, not your floating head
 - Hides legs and arms on the prone body to reduce wall clipping and ugly shadows
 
 ## What to expect
